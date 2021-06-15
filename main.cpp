@@ -4,9 +4,10 @@
 #include <QQmlApplicationEngine>
 
 #include "coroutine_integration.h"
+#include "coroutine_integration_network.h"
 
-Future<> timer(int duration) {
-    Future it;
+FutureResult<> timer(int duration) {
+    FutureResult it;
 
     QTimer::singleShot(duration, [it]() {
         it.succeed({});
@@ -21,6 +22,12 @@ class Singleton : public QObject
 
 public:
     Q_INVOKABLE FutureBase foo() {
+        QNetworkAccessManager man;
+        QNetworkRequest req;
+
+        auto resp = co_await man.get(req);
+        qDebug() << resp->errorString();
+
         auto foo = co_await timer(2000);
 
         co_return "i was returned by a coroutine";

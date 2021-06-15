@@ -20,18 +20,40 @@ struct Result {
     Error error() const {
         return std::get<Error>(it);
     }
+
+    bool ok() const {
+        return std::holds_alternative<T>(it);
+    }
 };
 
 struct Nil {};
 Q_DECLARE_METATYPE(Nil)
+
+template<typename T = Nil> requires Variantable<T>
+class Future : public FutureBase
+{
+
+public:
+    void succeed(const T& it) const {
+        FutureBase::succeed( QVariant::fromValue(it) );
+    }
+    void fail(const T& it) const {
+        FutureBase::succeed( QVariant::fromValue(it) );
+    }
+    T result() const {
+        Q_ASSERT(settled());
+
+        return FutureBase::result().template value<T>();
+    }
+};
 
 struct Error {
     QString err;
 };
 Q_DECLARE_METATYPE(Error)
 
-template<typename T = Nil, typename Error = Error> requires Variantable<T> && Variantable<Error>
-class Future : public FutureBase
+template<typename T = Nil, typename Error = Error> requires Variantable<T> && Variantable<Error> && (!std::is_same<T, Error>::value)
+class FutureResult : public FutureBase
 {
 
 public:
