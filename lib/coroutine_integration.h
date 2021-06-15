@@ -63,7 +63,7 @@ struct ns::coroutine_traits<FutureBase, Args...> {
     };
 };
 
-auto operator co_await(FutureBase it) noexcept
+inline auto operator co_await(FutureBase it) noexcept
 {
     struct Awaiter {
         FutureBase future;
