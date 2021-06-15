@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2021 Carson Black <uhhadd@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+
 import QtQuick 2.10
 import QtQuick.Controls 2.10
 import org.kde.idk 1.0
