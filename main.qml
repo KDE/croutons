@@ -1,0 +1,21 @@
+import QtQuick 2.10
+import QtQuick.Controls 2.10
+import org.kde.idk 1.0
+import org.kde.kirigami 2.10 as Kirigami
+
+Kirigami.ApplicationWindow {
+    Rectangle {
+        color: "green"
+        width: 200
+        height: 200
+        visible: true
+
+        Button {
+            anchors.centerIn: parent
+            text: "eee"
+            onClicked: Singleton.foo().then((val) => {
+                console.warn(val)
+            })
+        }
+    }
+}
