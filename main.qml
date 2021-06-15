@@ -3,6 +3,8 @@ import QtQuick.Controls 2.10
 import org.kde.idk 1.0
 import org.kde.kirigami 2.10 as Kirigami
 
+import "test.qml" as Gay
+
 Kirigami.ApplicationWindow {
     Rectangle {
         color: "green"
