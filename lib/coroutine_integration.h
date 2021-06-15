@@ -20,186 +20,172 @@ namespace ns = std;
 
 // responsible for providing the overload of await_transform
 template<typename T>
-struct transformer
-{
-    static T transform(const T& t) {
-        return t;
-    }
+struct transformer {
+	static T transform(const T& t) {
+		return t;
+	}
 };
 
-template<typename ...Args>
+template<typename... Args>
 struct ns::coroutine_traits<FutureBase, Args...> {
-    struct promise_type {
-        private: FutureBase t;
-        public: promise_type() {
-            t = FutureBase {};
-        }
+	struct promise_type {
+	private:
+		FutureBase t;
 
-        FutureBase get_return_object() noexcept {
-            return t;
-        }
+	public:
+		promise_type() {
+			t = FutureBase{};
+		}
 
-        ns::suspend_never initial_suspend() const noexcept { return {}; }
-        ns::suspend_never final_suspend() const noexcept { return {}; }
+		FutureBase get_return_object() noexcept {
+			return t;
+		}
 
-        void return_value(const QVariant& value) noexcept
-        {
-            t.succeed(value);
-        }
-        void return_value(QVariant &&value) noexcept
-        {
-            t.succeed(std::move(value));
-        }
+		ns::suspend_never initial_suspend() const noexcept { return {}; }
+		ns::suspend_never final_suspend() const noexcept { return {}; }
 
-        template<typename Awaited>
-        auto await_transform(const Awaited& t)
-        {
-            return transformer<Awaited>::transform(t);
-        }
+		void return_value(const QVariant& value) noexcept {
+			t.succeed(value);
+		}
+		void return_value(QVariant&& value) noexcept {
+			t.succeed(std::move(value));
+		}
 
-        void unhandled_exception() noexcept {
-            Q_ASSERT("unhandled exception");
-        }
-    };
+		template<typename Awaited>
+		auto await_transform(const Awaited& t) {
+			return transformer<Awaited>::transform(t);
+		}
+
+		void unhandled_exception() noexcept {
+			Q_ASSERT("unhandled exception");
+		}
+	};
 };
 
-inline auto operator co_await(FutureBase it) noexcept
-{
-    struct Awaiter {
-        FutureBase future;
+inline auto operator co_await(FutureBase it) noexcept {
+	struct Awaiter {
+		FutureBase future;
 
-        bool await_ready() const noexcept {
-            return future.settled();
-        }
-        void await_suspend(ns::coroutine_handle<> cont) const {
-            future.then([cont](QVariant) mutable {
-                cont();
-            }, [cont](QVariant) mutable {
-                cont();
-            });
-        }
-        QVariant await_resume() {
-            return future.result();
-        }
-    };
+		bool await_ready() const noexcept {
+			return future.settled();
+		}
+		void await_suspend(ns::coroutine_handle<> cont) const {
+			future.then([cont](QVariant) mutable { cont(); }, [cont](QVariant) mutable { cont(); });
+		}
+		QVariant await_resume() {
+			return future.result();
+		}
+	};
 
-    return Awaiter{ it };
+	return Awaiter{it};
 }
 
-template<typename T, typename ...Args>
+template<typename T, typename... Args>
 struct ns::coroutine_traits<Future<T>, Args...> {
-    struct promise_type {
-        private: Future<T> v;
-        public: promise_type() {
-            v = Future<T> {};
-        }
+	struct promise_type {
+	private:
+		Future<T> v;
 
-        Future<T> get_return_object() noexcept {
-            return v;
-        }
+	public:
+		promise_type() {
+			v = Future<T>{};
+		}
 
-        ns::suspend_never initial_suspend() const noexcept { return {}; }
-        ns::suspend_never final_suspend() const noexcept { return {}; }
+		Future<T> get_return_object() noexcept {
+			return v;
+		}
 
-        void return_value(const T& value) noexcept
-        {
-            v.succeed(value);
-        }
-        void return_value(T &&value) noexcept
-        {
-            v.succeed(std::move(value));
-        }
+		ns::suspend_never initial_suspend() const noexcept { return {}; }
+		ns::suspend_never final_suspend() const noexcept { return {}; }
 
-        template<typename Awaited>
-        auto await_transform(const Awaited& t)
-        {
-            return transformer<Awaited>::transform(t);
-        }
+		void return_value(const T& value) noexcept {
+			v.succeed(value);
+		}
+		void return_value(T&& value) noexcept {
+			v.succeed(std::move(value));
+		}
 
-        void unhandled_exception() noexcept {
-            Q_ASSERT("unhandled exception");
-        }
-    };
+		template<typename Awaited>
+		auto await_transform(const Awaited& t) {
+			return transformer<Awaited>::transform(t);
+		}
+
+		void unhandled_exception() noexcept {
+			Q_ASSERT("unhandled exception");
+		}
+	};
 };
 
-template<typename T> auto operator co_await(Future<T> it) noexcept
-{
-    struct Awaiter {
-        Future<T> future;
+template<typename T>
+auto operator co_await(Future<T> it) noexcept {
+	struct Awaiter {
+		Future<T> future;
 
-        bool await_ready() const noexcept {
-            return future.settled();
-        }
-        void await_suspend(ns::coroutine_handle<> cont) const {
-            future.then([cont](QVariant) mutable {
-                cont();
-            }, [cont](QVariant) mutable {
-                cont();
-            });
-        }
-        T await_resume() {
-            return future.result();
-        }
-    };
+		bool await_ready() const noexcept {
+			return future.settled();
+		}
+		void await_suspend(ns::coroutine_handle<> cont) const {
+			future.then([cont](QVariant) mutable { cont(); }, [cont](QVariant) mutable { cont(); });
+		}
+		T await_resume() {
+			return future.result();
+		}
+	};
 
-    return Awaiter{ it };
+	return Awaiter{it};
 }
 
-template<typename T, typename Error, typename ...Args>
+template<typename T, typename Error, typename... Args>
 struct ns::coroutine_traits<FutureResult<T, Error>, Args...> {
-    struct promise_type {
-        private: FutureResult<T, Error> v;
-        public: promise_type() {
-            v = FutureResult<T, Error> {};
-        }
+	struct promise_type {
+	private:
+		FutureResult<T, Error> v;
 
-        FutureResult<T, Error> get_return_object() noexcept {
-            return v;
-        }
+	public:
+		promise_type() {
+			v = FutureResult<T, Error>{};
+		}
 
-        ns::suspend_never initial_suspend() const noexcept { return {}; }
-        ns::suspend_never final_suspend() const noexcept { return {}; }
+		FutureResult<T, Error> get_return_object() noexcept {
+			return v;
+		}
 
-        void return_value(const Res<T, Error>& value) noexcept
-        {
-            v.finish(value);
-        }
-        void return_value(Res<T, Error> &&value) noexcept
-        {
-            v.finish(std::move(value));
-        }
+		ns::suspend_never initial_suspend() const noexcept { return {}; }
+		ns::suspend_never final_suspend() const noexcept { return {}; }
 
-        template<typename Awaited>
-        auto await_transform(const Awaited& t)
-        {
-            return transformer<Awaited>::transform(t);
-        }
+		void return_value(const Res<T, Error>& value) noexcept {
+			v.finish(value);
+		}
+		void return_value(Res<T, Error>&& value) noexcept {
+			v.finish(std::move(value));
+		}
 
-        void unhandled_exception() noexcept {
-            Q_ASSERT("unhandled exception");
-        }
-    };
+		template<typename Awaited>
+		auto await_transform(const Awaited& t) {
+			return transformer<Awaited>::transform(t);
+		}
+
+		void unhandled_exception() noexcept {
+			Q_ASSERT("unhandled exception");
+		}
+	};
 };
 
-template<typename T, typename Error> auto operator co_await(FutureResult<T, Error> it) noexcept
-{
-    struct Awaiter {
-        FutureResult<T, Error> future;
+template<typename T, typename Error>
+auto operator co_await(FutureResult<T, Error> it) noexcept {
+	struct Awaiter {
+		FutureResult<T, Error> future;
 
-        bool await_ready() const noexcept {
-            return future.settled();
-        }
-        void await_suspend(ns::coroutine_handle<> cont) const {
-            future.then([cont](QVariant) mutable {
-                cont();
-            }, [cont](QVariant) mutable {
-                cont();
-            });
-        }
-        Result<T, Error> await_resume() {
-            return Result<T, Error>{future.result()};
-        }
-    };
+		bool await_ready() const noexcept {
+			return future.settled();
+		}
+		void await_suspend(ns::coroutine_handle<> cont) const {
+			future.then([cont](QVariant) mutable { cont(); }, [cont](QVariant) mutable { cont(); });
+		}
+		Result<T, Error> await_resume() {
+			return Result<T, Error>{future.result()};
+		}
+	};
 
-    return Awaiter{ it };
+	return Awaiter{it};
 }

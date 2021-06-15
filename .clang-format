@@ -1,0 +1,9 @@
+BasedOnStyle: Mozilla
+BraceWrapping:
+  AfterClass: true
+BreakBeforeBraces: Custom
+ColumnLimit: 0
+Cpp11BracedListStyle: true
+Standard: Cpp03
+TabWidth: 2
+UseTab: ForContinuationAndIndentation
