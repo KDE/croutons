@@ -27,6 +27,9 @@ Library {
     cpp.cxxFlags: isClang ? ["-fcoroutines-ts", "-stdlib=libc++"] : ["-fcoroutines"]
     cpp.cxxLanguageVersion: "c++20"
 
+    install: true
+    installDir: "lib64"
+
     Depends { name: "cpp" }
     Depends { name: "Qt"; submodules: ["core", "qml"] }
 }
