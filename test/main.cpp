@@ -52,12 +52,30 @@ void wawajete() {
     });
 }
 
+class Singleton : public QObject
+{
+
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE FutureBase wait() {
+        co_await timer(1000);
+
+        co_return "hi";
+    }
+
+};
+
 int main(int argc, char* argv[]) {
     QGuiApplication app(argc, argv);
 
-    futureMain().then([&app](QVariant ret) {
-        app.exit(ret.toInt());
-    });
+    qRegisterMetaType<FutureBase>();
+    qmlRegisterSingletonType<Singleton>("org.kde.croutons", 1, 0, "Singleton", [](QQmlEngine*, QJSEngine*) -> QObject* { return new Singleton; });
+
+    QQmlApplicationEngine eng;
+    eng.load("main.qml");
 
     return app.exec();
 }
+
+#include "main.moc"

@@ -4,12 +4,13 @@
 
 import QtQuick 2.10
 import QtQuick.Controls 2.10
-import org.kde.idk 1.0
+import org.kde.croutons 1.0
 import org.kde.kirigami 2.10 as Kirigami
 
-import "test.qml" as Gay
-
 Kirigami.ApplicationWindow {
+    width: 200
+    height: 200
+
     Rectangle {
         color: "green"
         width: 200
@@ -18,10 +19,7 @@ Kirigami.ApplicationWindow {
 
         Button {
             anchors.centerIn: parent
-            text: "eee"
-            onClicked: Singleton.foo().then((val) => {
-                console.warn(val)
-            })
+            Component.onCompleted: text = Singleton.wait().valueOr("toki")
         }
     }
 }

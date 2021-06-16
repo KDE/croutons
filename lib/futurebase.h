@@ -21,6 +21,9 @@ class FutureBase
 		std::function<void(QVariant)> onSucc = [](QVariant) {};
 		std::function<void(QVariant)> onFail = [](QVariant) {};
 
+		std::function<void(QVariant)> valueOr = [](QVariant) {};
+		QObject* valueOrObject = nullptr;
+
 		bool settled = false;
 		bool succeeded = false;
 	};
@@ -45,6 +48,7 @@ public:
 
 		d->result = value;
 		d->onSucc(d->result);
+		d->valueOr(d->result);
 	}
 	void fail(const QVariant& value) const {
 		if (d->settled) {
@@ -86,8 +90,10 @@ public:
 
 		if (d->settled && d->succeeded) {
 			d->onSucc(result());
+			d->valueOr(result());
 		} else if (d->settled && !d->succeeded) {
 			d->onFail(result());
 		}
 	}
+	Q_INVOKABLE QJSValue valueOr(const QJSValue& it);
 };
