@@ -153,10 +153,16 @@ struct ns::coroutine_traits<FutureResult<T, Error>, Args...> {
 		ns::suspend_never initial_suspend() const noexcept { return {}; }
 		ns::suspend_never final_suspend() const noexcept { return {}; }
 
-		void return_value(const Res<T, Error>& value) noexcept {
+		void return_value(const Result<T, Error>& value) noexcept {
 			v.finish(value);
 		}
-		void return_value(Res<T, Error>&& value) noexcept {
+		void return_value(const T& value) noexcept {
+			v.succeed(value);
+		}
+		void return_value(const Error& value) noexcept {
+			v.fail(value);
+		}
+		void return_value(Result<T, Error>&& value) noexcept {
 			v.finish(std::move(value));
 		}
 
@@ -180,7 +186,7 @@ auto operator co_await(FutureResult<T, Error> it) noexcept {
 			return future.settled();
 		}
 		void await_suspend(ns::coroutine_handle<> cont) const {
-			future.then([cont](QVariant) mutable { cont(); }, [cont](QVariant) mutable { cont(); });
+			future.then([cont](Result<T ,Error>) mutable { cont(); });
 		}
 		Result<T, Error> await_resume() {
 			return Result<T, Error>{future.result()};

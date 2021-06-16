@@ -32,6 +32,26 @@ Future<int> futureMain() {
     co_return 0;
 }
 
+Future<int> something() {
+    co_return 0;
+}
+
+void anotherThing() {
+    something().then([](int i) {
+
+    });
+}
+
+FutureResult<int> yetAnotherThing() {
+    co_return 0;
+}
+
+void wawajete() {
+    yetAnotherThing().then([](Result<int, Error> r) {
+
+    });
+}
+
 int main(int argc, char* argv[]) {
     QGuiApplication app(argc, argv);
 

@@ -12,11 +12,8 @@ concept Variantable = requires(T a) {
 };
 
 template<typename T, typename Error>
-using Res = std::variant<T, Error>;
-
-template<typename T, typename Error>
 struct Result {
-	Res<T, Error> it;
+	std::variant<T, Error> it;
 
 	T value() const {
 		return std::get<T>(it);
@@ -49,6 +46,10 @@ public:
 
 		return FutureBase::result().template value<T>();
 	}
+	void then(std::function<void(T)> then) const {
+		auto wrap = [then](QVariant r) { then(qvariant_cast<T>(r)); };
+		FutureBase::then(wrap, wrap);
+	}
 };
 
 struct Error {
@@ -67,25 +68,29 @@ public:
 	void fail(const Error& it) const {
 		FutureBase::fail(QVariant::fromValue(it));
 	}
-	void finish(const Res<T, Error>& it) const {
-		if (std::holds_alternative<T>(it)) {
-			succeed(std::get<T>(it));
+	void finish(const Result<T, Error>& it) const {
+		if (it.ok()) {
+			succeed(it.value());
 		} else {
-			fail(std::get<Error>(it));
+			fail(it.error());
 		}
 	}
 
-	Res<T, Error> result() const {
+	Result<T, Error> result() const {
 		Q_ASSERT(settled());
 
-		Res<T, Error> res;
+		Result<T, Error> res;
 
 		if (!success()) {
-			res = FutureBase::result().template value<Error>();
+			res = Result<T, Error> { .it = FutureBase::result().template value<Error>() };
 		} else {
-			res = FutureBase::result().template value<T>();
+			res = Result<T, Error> { .it = FutureBase::result().template value<T>() };
 		}
 
 		return res;
+	}
+	void then(std::function<void(Result<T, Error>)> then) const {
+		auto wrap = [then, this](QVariant) { then(this->result()); };
+		FutureBase::then(wrap, wrap);
 	}
 };
