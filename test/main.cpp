@@ -10,6 +10,8 @@
 #include "coroutine_integration.h"
 #include "coroutine_integration_network.h"
 
+#include "effects.h"
+
 FutureResult<> timer(int duration) {
     FutureResult it;
 
@@ -72,7 +74,39 @@ public:
 
 };
 
+using Maths = EffectFun<std::function<int(int, int)>>;
+using Log = EffectVoidFun<std::function<void(QString)>>;
+
+Effect<int> contextDependentArithmetic() {
+    co_return perform Maths(1, 2);
+}
+
+Effect<void> contextDependentLogging() {
+    perform Log("hi");
+
+    co_return;
+}
+
+void mu() {
+    {
+        auto handler = Maths::handler([](int i, int ii) -> int {
+            return i + ii;
+        });
+
+        qDebug() << contextDependentArithmetic();
+    }
+    {
+        auto handler = Maths::handler([](int i, int ii) -> int {
+            return i * ii;
+        });
+
+        qDebug() << contextDependentArithmetic();
+    }
+}
+
 int main(int argc, char* argv[]) {
+    mu();
+
     QGuiApplication app(argc, argv);
 
     qRegisterMetaType<FutureBase>();
