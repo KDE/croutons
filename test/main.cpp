@@ -42,6 +42,10 @@ void anotherThing() {
     });
 }
 
+Future<void> voidSomething() {
+    co_return;
+}
+
 FutureResult<int> yetAnotherThing() {
     co_return 0;
 }
@@ -59,6 +63,8 @@ class Singleton : public QObject
 
 public:
     Q_INVOKABLE FutureBase wait() {
+        co_await voidSomething();
+
         co_await timer(1000);
 
         co_return "hi";

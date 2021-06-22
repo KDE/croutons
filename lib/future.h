@@ -31,7 +31,7 @@ struct Nil {};
 Q_DECLARE_METATYPE(Nil)
 
 template<typename T = Nil>
-requires Variantable<T> class Future : public FutureBase
+requires (Variantable<T> || std::is_same<T, void>::value) class Future : public FutureBase
 {
 
 public:
@@ -46,9 +46,28 @@ public:
 
 		return FutureBase::result().template value<T>();
 	}
-	void then(std::function<void(T)> then) const {
-		auto wrap = [then](QVariant r) { then(qvariant_cast<T>(r)); };
-		FutureBase::then(wrap, wrap);
+	void then(std::function<void(T)> then, std::function<void(T)> orElse = [](T){}) const {
+		auto wrap1 = [then](QVariant r) { then(qvariant_cast<T>(r)); };
+		auto wrap2 = [orElse](QVariant r) { orElse(qvariant_cast<T>(r)); };
+		FutureBase::then(wrap1, wrap2);
+	}
+};
+
+template<>
+class Future<void> : public FutureBase
+{
+
+public:
+	void succeed() const {
+		FutureBase::succeed(QVariant());
+	}
+	void fail() const {
+		FutureBase::succeed(QVariant());
+	}
+	void then(std::function<void()> then, std::function<void()> orElse = [](){}) const {
+		auto wrap1 = [then](QVariant) { then(); };
+		auto wrap2 = [orElse](QVariant) { orElse(); };
+		FutureBase::then(wrap1, wrap2);
 	}
 };
 

@@ -116,6 +116,39 @@ struct ns::coroutine_traits<Future<T>, Args...> {
 	};
 };
 
+template<typename... Args>
+struct ns::coroutine_traits<Future<void>, Args...> {
+	struct promise_type {
+	private:
+		Future<void> v;
+
+	public:
+		promise_type() {
+			v = Future<void>{};
+		}
+
+		Future<void> get_return_object() noexcept {
+			return v;
+		}
+
+		ns::suspend_never initial_suspend() const noexcept { return {}; }
+		ns::suspend_never final_suspend() const noexcept { return {}; }
+
+		void return_void() noexcept {
+			v.succeed();
+		}
+
+		template<typename Awaited>
+		auto await_transform(const Awaited& t) {
+			return transformer<Awaited>::transform(t);
+		}
+
+		void unhandled_exception() noexcept {
+			Q_ASSERT("unhandled exception");
+		}
+	};
+};
+
 template<typename T>
 auto operator co_await(Future<T> it) noexcept {
 	struct Awaiter {
@@ -129,6 +162,25 @@ auto operator co_await(Future<T> it) noexcept {
 		}
 		T await_resume() {
 			return future.result();
+		}
+	};
+
+	return Awaiter{it};
+}
+
+template<>
+inline auto operator co_await(Future<void> it) noexcept {
+	struct Awaiter {
+		Future<void> future;
+
+		bool await_ready() const noexcept {
+			return future.settled();
+		}
+		void await_suspend(ns::coroutine_handle<> cont) const {
+			future.then([cont]() mutable { cont(); }, [cont]() mutable { cont(); });
+		}
+		void await_resume() {
+			return;
 		}
 	};
 
