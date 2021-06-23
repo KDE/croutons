@@ -35,6 +35,10 @@ requires (Variantable<T> || std::is_same<T, void>::value) class Future : public 
 {
 
 public:
+	Future() : FutureBase() {
+	}
+	Future(const FutureBase& other) : FutureBase(other) {
+	}
 	void succeed(const T& it) const {
 		FutureBase::succeed(QVariant::fromValue(it));
 	}
@@ -81,6 +85,10 @@ template<typename T = Nil, typename Error = Error>
 {
 
 public:
+	FutureResult() : FutureBase() {
+	}
+	FutureResult(const FutureBase& other) : FutureBase(other) {
+	}
 	void succeed(const T& it) const {
 		FutureBase::succeed(QVariant::fromValue(it));
 	}
@@ -109,7 +117,7 @@ public:
 		return res;
 	}
 	void then(std::function<void(Result<T, Error>)> then) const {
-		auto wrap = [then, this](QVariant) { then(this->result()); };
+		auto wrap = [then, *this](QVariant) { then(this->result()); };
 		FutureBase::then(wrap, wrap);
 	}
 };
