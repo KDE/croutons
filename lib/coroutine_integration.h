@@ -158,7 +158,7 @@ auto operator co_await(Future<T> it) noexcept {
 			return future.settled();
 		}
 		void await_suspend(ns::coroutine_handle<> cont) const {
-			future.then([cont](QVariant) mutable { cont(); }, [cont](QVariant) mutable { cont(); });
+			future.then([cont](T) mutable { cont(); }, [cont](T) mutable { cont(); });
 		}
 		T await_resume() {
 			return future.result();
