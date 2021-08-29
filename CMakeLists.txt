@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2021 Carson Black <uhhadd@gmail.com>
+#
+# SPDX-License-Identifier: MIT
+
 cmake_minimum_required(VERSION 3.16)
 
 set(CROUTONS_VERSION 1.0)
