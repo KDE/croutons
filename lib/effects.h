@@ -42,8 +42,8 @@ public:
 			return t;
 		}
 
-		ns::suspend_never initial_suspend() const noexcept { return {}; }
-		ns::suspend_never final_suspend() const noexcept { return {}; }
+		coroutine_namespace::suspend_never initial_suspend() const noexcept { return {}; }
+		coroutine_namespace::suspend_never final_suspend() const noexcept { return {}; }
 
 		void return_value(const T& value) noexcept {
 			t.val->t = value;
@@ -63,7 +63,7 @@ class Effect<void> {
 };
 
 template<typename ...Args>
-struct ns::coroutine_traits<Effect<void>, Args...>
+struct coroutine_namespace::coroutine_traits<Effect<void>, Args...>
 {
 	struct promise_type {
 	private:
@@ -78,8 +78,8 @@ struct ns::coroutine_traits<Effect<void>, Args...>
 			return t;
 		}
 
-		ns::suspend_never initial_suspend() const noexcept { return {}; }
-		ns::suspend_never final_suspend() const noexcept { return {}; }
+		coroutine_namespace::suspend_never initial_suspend() const noexcept { return {}; }
+		coroutine_namespace::suspend_never final_suspend() const noexcept { return {}; }
 
 		void return_void() noexcept {
 		}
@@ -114,7 +114,7 @@ public:
 	bool await_ready() const noexcept {
 		return true;
 	}
-	void await_suspend(ns::coroutine_handle<> cont) const {
+	void await_suspend(coroutine_namespace::coroutine_handle<> cont) const {
 		cont();
 	}
 	void await_resume() {
@@ -150,7 +150,7 @@ public:
 	bool await_ready() const noexcept {
 		return true;
 	}
-	void await_suspend(ns::coroutine_handle<> cont) const {
+	void await_suspend(coroutine_namespace::coroutine_handle<> cont) const {
 		cont();
 	}
 	typename Fn::result_type await_resume() {

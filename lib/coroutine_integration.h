@@ -9,12 +9,12 @@
 #if defined(__clang__)
 
 #include <experimental/coroutine>
-namespace ns = std::experimental;
+namespace coroutine_namespace = std::experimental;
 
 #elif defined(__GNUC__)
 
 #include <coroutine>
-namespace ns = std;
+namespace coroutine_namespace = std;
 
 #endif
 
@@ -27,7 +27,7 @@ struct transformer {
 };
 
 template<typename... Args>
-struct ns::coroutine_traits<FutureBase, Args...> {
+struct coroutine_namespace::coroutine_traits<FutureBase, Args...> {
 	struct promise_type {
 	private:
 		FutureBase t;
@@ -41,8 +41,8 @@ struct ns::coroutine_traits<FutureBase, Args...> {
 			return t;
 		}
 
-		ns::suspend_never initial_suspend() const noexcept { return {}; }
-		ns::suspend_never final_suspend() const noexcept { return {}; }
+		coroutine_namespace::suspend_never initial_suspend() const noexcept { return {}; }
+		coroutine_namespace::suspend_never final_suspend() const noexcept { return {}; }
 
 		void return_value(const QVariant& value) noexcept {
 			t.succeed(value);
@@ -69,7 +69,7 @@ inline auto operator co_await(FutureBase it) noexcept {
 		bool await_ready() const noexcept {
 			return future.settled();
 		}
-		void await_suspend(ns::coroutine_handle<> cont) const {
+		void await_suspend(coroutine_namespace::coroutine_handle<> cont) const {
 			future.then([cont](QVariant) mutable { cont(); }, [cont](QVariant) mutable { cont(); });
 		}
 		QVariant await_resume() {
@@ -81,7 +81,7 @@ inline auto operator co_await(FutureBase it) noexcept {
 }
 
 template<typename T, typename... Args>
-struct ns::coroutine_traits<Future<T>, Args...> {
+struct coroutine_namespace::coroutine_traits<Future<T>, Args...> {
 	struct promise_type {
 	private:
 		Future<T> v;
@@ -95,8 +95,8 @@ struct ns::coroutine_traits<Future<T>, Args...> {
 			return v;
 		}
 
-		ns::suspend_never initial_suspend() const noexcept { return {}; }
-		ns::suspend_never final_suspend() const noexcept { return {}; }
+		coroutine_namespace::suspend_never initial_suspend() const noexcept { return {}; }
+		coroutine_namespace::suspend_never final_suspend() const noexcept { return {}; }
 
 		void return_value(const T& value) noexcept {
 			v.succeed(value);
@@ -117,7 +117,7 @@ struct ns::coroutine_traits<Future<T>, Args...> {
 };
 
 template<typename... Args>
-struct ns::coroutine_traits<Future<void>, Args...> {
+struct coroutine_namespace::coroutine_traits<Future<void>, Args...> {
 	struct promise_type {
 	private:
 		Future<void> v;
@@ -131,8 +131,8 @@ struct ns::coroutine_traits<Future<void>, Args...> {
 			return v;
 		}
 
-		ns::suspend_never initial_suspend() const noexcept { return {}; }
-		ns::suspend_never final_suspend() const noexcept { return {}; }
+		coroutine_namespace::suspend_never initial_suspend() const noexcept { return {}; }
+		coroutine_namespace::suspend_never final_suspend() const noexcept { return {}; }
 
 		void return_void() noexcept {
 			v.succeed();
@@ -157,7 +157,7 @@ auto operator co_await(Future<T> it) noexcept {
 		bool await_ready() const noexcept {
 			return future.settled();
 		}
-		void await_suspend(ns::coroutine_handle<> cont) const {
+		void await_suspend(coroutine_namespace::coroutine_handle<> cont) const {
 			future.then([cont](T) mutable { cont(); }, [cont](T) mutable { cont(); });
 		}
 		T await_resume() {
@@ -176,7 +176,7 @@ inline auto operator co_await(Future<void> it) noexcept {
 		bool await_ready() const noexcept {
 			return future.settled();
 		}
-		void await_suspend(ns::coroutine_handle<> cont) const {
+		void await_suspend(coroutine_namespace::coroutine_handle<> cont) const {
 			future.then([cont]() mutable { cont(); }, [cont]() mutable { cont(); });
 		}
 		void await_resume() {
@@ -188,7 +188,7 @@ inline auto operator co_await(Future<void> it) noexcept {
 }
 
 template<typename T, typename Error, typename... Args>
-struct ns::coroutine_traits<FutureResult<T, Error>, Args...> {
+struct coroutine_namespace::coroutine_traits<FutureResult<T, Error>, Args...> {
 	struct promise_type {
 	private:
 		FutureResult<T, Error> v;
@@ -202,8 +202,8 @@ struct ns::coroutine_traits<FutureResult<T, Error>, Args...> {
 			return v;
 		}
 
-		ns::suspend_never initial_suspend() const noexcept { return {}; }
-		ns::suspend_never final_suspend() const noexcept { return {}; }
+		coroutine_namespace::suspend_never initial_suspend() const noexcept { return {}; }
+		coroutine_namespace::suspend_never final_suspend() const noexcept { return {}; }
 
 		void return_value(const Result<T, Error>& value) noexcept {
 			v.finish(value);
@@ -237,7 +237,7 @@ auto operator co_await(FutureResult<T, Error> it) noexcept {
 		bool await_ready() const noexcept {
 			return future.settled();
 		}
-		void await_suspend(ns::coroutine_handle<> cont) const {
+		void await_suspend(coroutine_namespace::coroutine_handle<> cont) const {
 			future.then([cont](Result<T ,Error>) mutable { cont(); });
 		}
 		Result<T, Error> await_resume() {
