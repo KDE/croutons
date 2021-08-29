@@ -3,6 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 QtApplication {
+    name: "croutons-test"
+
     files: ["*.cpp", "*.h"]
     type: ["application", "autotest"]
 

@@ -27,10 +27,7 @@ struct Result {
 	}
 };
 
-struct Nil {};
-Q_DECLARE_METATYPE(Nil)
-
-template<typename T = Nil>
+template<typename T = void>
 requires (Variantable<T> || std::is_same<T, void>::value) class Future : public FutureBase
 {
 
@@ -79,6 +76,9 @@ struct Error {
 	QString err;
 };
 Q_DECLARE_METATYPE(Error)
+
+struct Nil {};
+Q_DECLARE_METATYPE(Nil)
 
 template<typename T = Nil, typename Error = Error>
 	requires Variantable<T>&& Variantable<Error> && (!std::is_same<T, Error>::value) class FutureResult : public FutureBase
