@@ -33,10 +33,6 @@ struct coroutine_namespace::coroutine_traits<FutureBase, Args...> {
 		FutureBase t;
 
 	public:
-		promise_type() {
-			t = FutureBase{};
-		}
-
 		FutureBase get_return_object() noexcept {
 			return t;
 		}
@@ -87,10 +83,6 @@ struct coroutine_namespace::coroutine_traits<Future<T>, Args...> {
 		Future<T> v;
 
 	public:
-		promise_type() {
-			v = Future<T>{};
-		}
-
 		Future<T> get_return_object() noexcept {
 			return v;
 		}
@@ -123,10 +115,6 @@ struct coroutine_namespace::coroutine_traits<Future<void>, Args...> {
 		Future<void> v;
 
 	public:
-		promise_type() {
-			v = Future<void>{};
-		}
-
 		Future<void> get_return_object() noexcept {
 			return v;
 		}
@@ -194,10 +182,6 @@ struct coroutine_namespace::coroutine_traits<FutureResult<T, Error>, Args...> {
 		FutureResult<T, Error> v;
 
 	public:
-		promise_type() {
-			v = FutureResult<T, Error>{};
-		}
-
 		FutureResult<T, Error> get_return_object() noexcept {
 			return v;
 		}
