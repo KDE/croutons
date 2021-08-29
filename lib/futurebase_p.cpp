@@ -5,6 +5,9 @@
 #include <QDebug>
 #include "futurebase.h"
 
+namespace Croutons
+{
+
 class FutureListener : public QObject
 {
     Q_OBJECT
@@ -42,5 +45,7 @@ QJSValue FutureBase::valueOr(const QJSValue& it)
     };
     return fn.call({eng->newQObject(d->valueOrObject)});
 }
+
+}; // namespace Croutons
 
 #include "futurebase_p.moc"

@@ -6,6 +6,9 @@
 
 #include "futurebase.h"
 
+namespace Croutons
+{
+
 template<typename T>
 concept Variantable = requires(T a) {
 	QVariant::fromValue(a);
@@ -76,10 +79,8 @@ public:
 struct Error {
 	QString err;
 };
-Q_DECLARE_METATYPE(Error)
 
 struct Nil {};
-Q_DECLARE_METATYPE(Nil)
 
 template<typename T = Nil, typename Error = Error>
 	requires Variantable<T>&& Variantable<Error> && (!std::is_same_v<T, Error>) class FutureResult : public FutureBase
@@ -122,3 +123,8 @@ public:
 		FutureBase::then(wrap, wrap);
 	}
 };
+
+} // namespace Croutons
+
+Q_DECLARE_METATYPE(Croutons::Error)
+Q_DECLARE_METATYPE(Croutons::Nil)

@@ -12,8 +12,8 @@
 
 #include "effects.h"
 
-FutureResult<> timer(int duration) {
-    FutureResult it;
+Croutons::FutureResult<> timer(int duration) {
+    Croutons::FutureResult it;
 
     QTimer::singleShot(duration, [it]() {
         it.succeed({});
@@ -22,7 +22,7 @@ FutureResult<> timer(int duration) {
     return it;
 }
 
-Future<int> futureMain() {
+Croutons::Future<int> futureMain() {
     auto then = QTime::currentTime();
 
     co_await timer(1500);
@@ -34,7 +34,7 @@ Future<int> futureMain() {
     co_return 0;
 }
 
-Future<int> something() {
+Croutons::Future<int> something() {
     co_return 0;
 }
 
@@ -44,16 +44,16 @@ void anotherThing() {
     });
 }
 
-Future<void> voidSomething() {
+Croutons::Future<void> voidSomething() {
     co_return;
 }
 
-FutureResult<int> yetAnotherThing() {
+Croutons::FutureResult<int> yetAnotherThing() {
     co_return 0;
 }
 
 void wawajete() {
-    yetAnotherThing().then([](Result<int, Error> r) {
+    yetAnotherThing().then([](Croutons::Result<int, Croutons::Error> r) {
 
     });
 }
@@ -64,7 +64,7 @@ class Singleton : public QObject
     Q_OBJECT
 
 public:
-    Q_INVOKABLE FutureBase wait() {
+    Q_INVOKABLE Croutons::FutureBase wait() {
         co_await voidSomething();
 
         co_await timer(1000);
@@ -109,7 +109,7 @@ int main(int argc, char* argv[]) {
 
     QGuiApplication app(argc, argv);
 
-    qRegisterMetaType<FutureBase>();
+    qRegisterMetaType<Croutons::FutureBase>();
     qmlRegisterSingletonType<Singleton>("org.kde.croutons", 1, 0, "Singleton", [](QQmlEngine*, QJSEngine*) -> QObject* { return new Singleton; });
 
     QQmlApplicationEngine eng;

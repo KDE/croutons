@@ -18,6 +18,9 @@ namespace coroutine_namespace = std;
 
 #endif
 
+namespace Croutons
+{
+
 // responsible for providing the overload of await_transform
 template<typename T>
 struct transformer {
@@ -26,14 +29,16 @@ struct transformer {
 	}
 };
 
+}; // namespace Croutons
+
 template<typename... Args>
-struct coroutine_namespace::coroutine_traits<FutureBase, Args...> {
+struct coroutine_namespace::coroutine_traits<Croutons::FutureBase, Args...> {
 	struct promise_type {
 	private:
-		FutureBase t;
+		Croutons::FutureBase t;
 
 	public:
-		FutureBase get_return_object() noexcept {
+		Croutons::FutureBase get_return_object() noexcept {
 			return t;
 		}
 
@@ -49,7 +54,7 @@ struct coroutine_namespace::coroutine_traits<FutureBase, Args...> {
 
 		template<typename Awaited>
 		auto await_transform(const Awaited& t) {
-			return transformer<Awaited>::transform(t);
+			return Croutons::transformer<Awaited>::transform(t);
 		}
 
 		void unhandled_exception() noexcept {
@@ -58,9 +63,9 @@ struct coroutine_namespace::coroutine_traits<FutureBase, Args...> {
 	};
 };
 
-inline auto operator co_await(FutureBase it) noexcept {
+inline auto operator co_await(Croutons::FutureBase it) noexcept {
 	struct Awaiter {
-		FutureBase future;
+		Croutons::FutureBase future;
 
 		bool await_ready() const noexcept {
 			return future.settled();
@@ -77,13 +82,13 @@ inline auto operator co_await(FutureBase it) noexcept {
 }
 
 template<typename T, typename... Args>
-struct coroutine_namespace::coroutine_traits<Future<T>, Args...> {
+struct coroutine_namespace::coroutine_traits<Croutons::Future<T>, Args...> {
 	struct promise_type {
 	private:
-		Future<T> v;
+		Croutons::Future<T> v;
 
 	public:
-		Future<T> get_return_object() noexcept {
+		Croutons::Future<T> get_return_object() noexcept {
 			return v;
 		}
 
@@ -99,7 +104,7 @@ struct coroutine_namespace::coroutine_traits<Future<T>, Args...> {
 
 		template<typename Awaited>
 		auto await_transform(const Awaited& t) {
-			return transformer<Awaited>::transform(t);
+			return Croutons::transformer<Awaited>::transform(t);
 		}
 
 		void unhandled_exception() noexcept {
@@ -109,13 +114,13 @@ struct coroutine_namespace::coroutine_traits<Future<T>, Args...> {
 };
 
 template<typename... Args>
-struct coroutine_namespace::coroutine_traits<Future<void>, Args...> {
+struct coroutine_namespace::coroutine_traits<Croutons::Future<void>, Args...> {
 	struct promise_type {
 	private:
-		Future<void> v;
+		Croutons::Future<void> v;
 
 	public:
-		Future<void> get_return_object() noexcept {
+		Croutons::Future<void> get_return_object() noexcept {
 			return v;
 		}
 
@@ -128,7 +133,7 @@ struct coroutine_namespace::coroutine_traits<Future<void>, Args...> {
 
 		template<typename Awaited>
 		auto await_transform(const Awaited& t) {
-			return transformer<Awaited>::transform(t);
+			return Croutons::transformer<Awaited>::transform(t);
 		}
 
 		void unhandled_exception() noexcept {
@@ -138,9 +143,9 @@ struct coroutine_namespace::coroutine_traits<Future<void>, Args...> {
 };
 
 template<typename T>
-auto operator co_await(Future<T> it) noexcept {
+auto operator co_await(Croutons::Future<T> it) noexcept {
 	struct Awaiter {
-		Future<T> future;
+		Croutons::Future<T> future;
 
 		bool await_ready() const noexcept {
 			return future.settled();
@@ -157,9 +162,9 @@ auto operator co_await(Future<T> it) noexcept {
 }
 
 template<>
-inline auto operator co_await(Future<void> it) noexcept {
+inline auto operator co_await(Croutons::Future<void> it) noexcept {
 	struct Awaiter {
-		Future<void> future;
+		Croutons::Future<void> future;
 
 		bool await_ready() const noexcept {
 			return future.settled();
@@ -176,20 +181,20 @@ inline auto operator co_await(Future<void> it) noexcept {
 }
 
 template<typename T, typename Error, typename... Args>
-struct coroutine_namespace::coroutine_traits<FutureResult<T, Error>, Args...> {
+struct coroutine_namespace::coroutine_traits<Croutons::FutureResult<T, Error>, Args...> {
 	struct promise_type {
 	private:
-		FutureResult<T, Error> v;
+		Croutons::FutureResult<T, Error> v;
 
 	public:
-		FutureResult<T, Error> get_return_object() noexcept {
+		Croutons::FutureResult<T, Error> get_return_object() noexcept {
 			return v;
 		}
 
 		coroutine_namespace::suspend_never initial_suspend() const noexcept { return {}; }
 		coroutine_namespace::suspend_never final_suspend() const noexcept { return {}; }
 
-		void return_value(const Result<T, Error>& value) noexcept {
+		void return_value(const Croutons::Result<T, Error>& value) noexcept {
 			v.finish(value);
 		}
 		void return_value(const T& value) noexcept {
@@ -198,13 +203,13 @@ struct coroutine_namespace::coroutine_traits<FutureResult<T, Error>, Args...> {
 		void return_value(const Error& value) noexcept {
 			v.fail(value);
 		}
-		void return_value(Result<T, Error>&& value) noexcept {
+		void return_value(Croutons::Result<T, Error>&& value) noexcept {
 			v.finish(std::move(value));
 		}
 
 		template<typename Awaited>
 		auto await_transform(const Awaited& t) {
-			return transformer<Awaited>::transform(t);
+			return Croutons::transformer<Awaited>::transform(t);
 		}
 
 		void unhandled_exception() noexcept {
@@ -214,18 +219,18 @@ struct coroutine_namespace::coroutine_traits<FutureResult<T, Error>, Args...> {
 };
 
 template<typename T, typename Error>
-auto operator co_await(FutureResult<T, Error> it) noexcept {
+auto operator co_await(Croutons::FutureResult<T, Error> it) noexcept {
 	struct Awaiter {
-		FutureResult<T, Error> future;
+		Croutons::FutureResult<T, Error> future;
 
 		bool await_ready() const noexcept {
 			return future.settled();
 		}
 		void await_suspend(coroutine_namespace::coroutine_handle<> cont) const {
-			future.then([cont](Result<T ,Error>) mutable { cont(); });
+			future.then([cont](Croutons::Result<T ,Error>) mutable { cont(); });
 		}
-		Result<T, Error> await_resume() {
-			return Result<T, Error>{future.result()};
+		Croutons::Result<T, Error> await_resume() {
+			return Croutons::Result<T, Error>{future.result()};
 		}
 	};
 

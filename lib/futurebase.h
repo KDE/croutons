@@ -9,6 +9,9 @@
 #include <QSharedPointer>
 #include <QVariant>
 
+namespace Croutons
+{
+
 class FutureBase
 {
 
@@ -97,3 +100,5 @@ public:
 	}
 	Q_INVOKABLE QJSValue valueOr(const QJSValue& it);
 };
+
+}; // namespace Croutons

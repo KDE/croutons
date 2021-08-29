@@ -9,7 +9,7 @@
 #include "coroutine_integration.h"
 
 template<>
-struct transformer<QNetworkReply*> {
+struct Croutons::transformer<QNetworkReply*> {
 	static auto transform(QNetworkReply* it) {
 		auto future = Future<QNetworkReply*>();
 
