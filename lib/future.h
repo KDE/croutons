@@ -48,8 +48,8 @@ public:
 
 		return FutureBase::result().template value<T>();
 	}
-	void then(std::function<void(T)> then, std::function<void(T)> orElse = [](T){}) const {
-		auto wrap1 = [then](QVariant r) { then(qvariant_cast<T>(r)); };
+	void then(std::function<void(T)> callback, std::function<void(T)> orElse = [](T){}) const {
+		auto wrap1 = [callback](QVariant r) { callback(qvariant_cast<T>(r)); };
 		auto wrap2 = [orElse](QVariant r) { orElse(qvariant_cast<T>(r)); };
 		FutureBase::then(wrap1, wrap2);
 	}
@@ -66,8 +66,8 @@ public:
 	void fail() const {
 		FutureBase::succeed(QVariant());
 	}
-	void then(std::function<void()> then, std::function<void()> orElse = [](){}) const {
-		auto wrap1 = [then](QVariant) { then(); };
+	void then(std::function<void()> callback, std::function<void()> orElse = [](){}) const {
+		auto wrap1 = [callback](QVariant) { callback(); };
 		auto wrap2 = [orElse](QVariant) { orElse(); };
 		FutureBase::then(wrap1, wrap2);
 	}
@@ -117,8 +117,8 @@ public:
 
 		return res;
 	}
-	void then(std::function<void(Result<T, Error>)> then) const {
-		auto wrap = [then, *this](QVariant) { then(this->result()); };
+	void then(std::function<void(Result<T, Error>)> callback) const {
+		auto wrap = [callback, *this](QVariant) { callback(this->result()); };
 		FutureBase::then(wrap, wrap);
 	}
 };
