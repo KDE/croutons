@@ -12,7 +12,7 @@ concept Variantable = requires(T a) {
 };
 
 template<typename T, typename Error>
-requires (!std::is_same<T, Error>::value)
+requires (!std::is_same_v<T, Error>)
 struct Result {
 	std::variant<T, Error> it;
 
@@ -29,7 +29,7 @@ struct Result {
 };
 
 template<typename T = void>
-requires (Variantable<T> || std::is_same<T, void>::value) class Future : public FutureBase
+requires (Variantable<T> || std::is_same_v<T, void>) class Future : public FutureBase
 {
 
 public:
@@ -82,7 +82,7 @@ struct Nil {};
 Q_DECLARE_METATYPE(Nil)
 
 template<typename T = Nil, typename Error = Error>
-	requires Variantable<T>&& Variantable<Error> && (!std::is_same<T, Error>::value) class FutureResult : public FutureBase
+	requires Variantable<T>&& Variantable<Error> && (!std::is_same_v<T, Error>) class FutureResult : public FutureBase
 {
 
 public:
