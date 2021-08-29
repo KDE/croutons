@@ -12,6 +12,7 @@ concept Variantable = requires(T a) {
 };
 
 template<typename T, typename Error>
+requires (!std::is_same<T, Error>::value)
 struct Result {
 	std::variant<T, Error> it;
 
