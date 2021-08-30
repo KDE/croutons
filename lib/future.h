@@ -36,6 +36,8 @@ requires (Variantable<T> || std::is_same_v<T, void>) class Future : public Futur
 {
 
 public:
+	using Kind = T;
+
 	Future() : FutureBase() {
 	}
 	Future(const FutureBase& other) : FutureBase(other) {
@@ -55,6 +57,37 @@ public:
 		auto wrap1 = [callback](QVariant r) { callback(qvariant_cast<T>(r)); };
 		auto wrap2 = [orElse](QVariant r) { orElse(qvariant_cast<T>(r)); };
 		FutureBase::then(wrap1, wrap2);
+	}
+	template<typename Function>
+	Future<typename std::result_of_t<Function(T)>::Kind>
+	flatMap(Function callback) const {
+		using NewT = typename std::result_of_t<Function(T)>::Kind;
+
+		Future<NewT> ret;
+
+		auto wrap1 = [callback, ret](QVariant r) {
+			auto bret = callback(qvariant_cast<T>(r));
+
+			bret.then([ret](NewT t) { ret.succeed(t); }, [ret](NewT t) { ret.fail(t); });
+		};
+
+		FutureBase::then(wrap1);
+
+		return ret;
+	}
+	template<typename Function>
+	Future<typename std::result_of_t<Function(T)>>
+	map(Function callback) const {
+		using NewT = std::result_of_t<Function(T)>;
+		Future<NewT> ret;
+
+		auto wrap1 = [callback, ret](QVariant r) {
+			ret.succeed(callback(qvariant_cast<T>(r)));
+		};
+
+		FutureBase::then(wrap1);
+
+		return ret;
 	}
 };
 
