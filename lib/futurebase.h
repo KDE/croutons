@@ -98,6 +98,21 @@ public:
 			d->onFail(result());
 		}
 	}
+	template<typename T>
+	static T get(const QVariant& variant)
+	{
+		return variant.value<T>();
+	}
+	template<typename T>
+	void succeed(const T& t) const
+	{
+		succeed(t);
+	}
+	template<typename T>
+	void fail(const T& t) const
+	{
+		fail(t);
+	}
 	Q_INVOKABLE QJSValue valueOr(const QJSValue& it);
 };
 

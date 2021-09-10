@@ -9,8 +9,22 @@
 namespace Croutons
 {
 
+// anything in here should not be considered part of the public API, and
+// may break at any time
+namespace detail
+{
+
+template<typename T>
+class NonVariantFuture
+{
+
+};
+
+};
+
 template<typename T>
 concept Variantable = requires(T a) {
+	qMetaTypeId<T>();
 	QVariant::fromValue(a);
 };
 
@@ -31,32 +45,34 @@ struct Result {
 	}
 };
 
-template<typename T = void>
-requires (Variantable<T> || std::is_same_v<T, void>) class Future : public FutureBase
+template<typename T = void, typename ImplClass = std::conditional_t<Variantable<T> || std::is_same_v<T, void>, FutureBase, detail::NonVariantFuture<T>>>
+class Future : public ImplClass
 {
 
 public:
 	using Kind = T;
 
-	Future() : FutureBase() {
+	Future() : ImplClass() {
 	}
-	Future(const FutureBase& other) : FutureBase(other) {
+	Future(const ImplClass& other) : ImplClass(other) {
 	}
+
 	void succeed(const T& it) const {
-		FutureBase::succeed(QVariant::fromValue(it));
+		ImplClass::succeed(it);
 	}
 	void fail(const T& it) const {
-		FutureBase::succeed(QVariant::fromValue(it));
+		ImplClass::fail(it);
 	}
 	T result() const {
-		Q_ASSERT(settled());
+		Q_ASSERT(ImplClass::settled());
 
-		return FutureBase::result().template value<T>();
+		return ImplClass::template get<T>(ImplClass::result());
 	}
 	void then(std::function<void(T)> callback, std::function<void(T)> orElse = [](T){}) const {
-		auto wrap1 = [callback](QVariant r) { callback(qvariant_cast<T>(r)); };
-		auto wrap2 = [orElse](QVariant r) { orElse(qvariant_cast<T>(r)); };
-		FutureBase::then(wrap1, wrap2);
+		auto wrap1 = [callback](auto r) { callback(ImplClass::template get<T>(r)); };
+		auto wrap2 = [orElse](auto r) { orElse(ImplClass::template get<T>(r)); };
+
+		ImplClass::then(wrap1, wrap2);
 	}
 	template<typename Function>
 	Future<typename std::result_of_t<Function(T)>::Kind>
@@ -66,12 +82,12 @@ public:
 		Future<NewT> ret;
 
 		auto wrap1 = [callback, ret](QVariant r) {
-			auto bret = callback(qvariant_cast<T>(r));
+			auto bret = callback(ImplClass::template get<T>(r));
 
 			bret.then([ret](NewT t) { ret.succeed(t); }, [ret](NewT t) { ret.fail(t); });
 		};
 
-		FutureBase::then(wrap1);
+		ImplClass::then(wrap1);
 
 		return ret;
 	}
@@ -82,17 +98,17 @@ public:
 		Future<NewT> ret;
 
 		auto wrap1 = [callback, ret](QVariant r) {
-			ret.succeed(callback(qvariant_cast<T>(r)));
+			ret.succeed(callback(ImplClass::template get<T>(r)));
 		};
 
-		FutureBase::then(wrap1);
+		ImplClass::then(wrap1);
 
 		return ret;
 	}
 };
 
 template<>
-class Future<void> : public FutureBase
+class Future<void, FutureBase> : public FutureBase
 {
 
 public:
@@ -162,6 +178,15 @@ public:
 			if (res.ok()) {
 				ret.succeed(res.value());
 			}
+		});
+
+		return ret;
+	}
+	Future<Result<T, Error>> toFutureResultT() {
+		Future<Result<T, Error>> ret;
+
+		then([ret](Result<T, Error> res) mutable {
+			ret.succeed(res);
 		});
 
 		return ret;
