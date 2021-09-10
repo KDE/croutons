@@ -155,6 +155,17 @@ public:
 		auto wrap = [callback, *this](QVariant) { callback(this->result()); };
 		FutureBase::then(wrap, wrap);
 	}
+	Future<T> toFutureT() {
+		Future<T> ret;
+
+		then([ret](Result<T, Error> res) mutable {
+			if (res.ok()) {
+				ret.succeed(res.value());
+			}
+		});
+
+		return ret;
+	}
 };
 
 } // namespace Croutons
