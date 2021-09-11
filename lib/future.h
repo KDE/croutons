@@ -23,10 +23,7 @@ class NonVariantFuture
 };
 
 template<typename T>
-concept Variantable = requires(T a) {
-	qMetaTypeId<T>();
-	QVariant::fromValue(a);
-};
+concept Variantable = QMetaTypeId2<T>::Defined != 0;
 
 template<typename T, typename Error>
 requires (!std::is_same_v<T, Error>)
@@ -97,7 +94,7 @@ public:
 		using NewT = std::result_of_t<Function(T)>;
 		Future<NewT> ret;
 
-		auto wrap1 = [callback, ret](QVariant r) {
+		auto wrap1 = [callback, ret](auto r) {
 			ret.succeed(callback(ImplClass::template get<T>(r)));
 		};
 
