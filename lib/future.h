@@ -17,7 +17,80 @@ namespace detail
 template<typename T>
 class NonVariantFuture
 {
+	struct Shared {
+		T result;
 
+		// ok, err
+		QList<std::function<void(T)>> onSucc;
+		QList<std::function<void(T)>> onFail;
+
+		bool settled = false;
+		bool succeeded = false;
+	};
+	QSharedPointer<Shared> d;
+
+	static void invoke(const QList<std::function<void(T)>> fns, const T& val)
+	{
+		for (const auto& it : fns) {
+			it(val);
+		}
+	}
+
+public:
+	NonVariantFuture() {
+		d.reset(new Shared);
+	}
+	NonVariantFuture(const NonVariantFuture& other) {
+		this->d = other.d;
+	}
+	~NonVariantFuture() {
+	}
+
+	void succeed(const T& value) const {
+		if (d->settled) {
+			return;
+		}
+		d->settled = true;
+		d->succeeded = true;
+
+		d->result = value;
+		invoke(d->onSucc, d->result);
+	}
+	void fail(const T& value) const {
+		if (d->settled) {
+			return;
+		}
+		d->settled = true;
+		d->succeeded = false;
+
+		d->result = value;
+		invoke(d->onFail, d->result);
+	}
+	T result() const {
+		return d->result;
+	}
+	void then(std::function<void(T)> then, std::function<void(T)> fail = nullptr) const {
+		d->onSucc << then;
+		if (fail != nullptr) {
+			d->onFail << fail;
+		}
+		if (d->settled && d->succeeded) {
+			then(result());
+		} else if (d->settled && !d->succeeded && fail != nullptr) {
+			fail(result());
+		}
+	}
+	bool settled() const {
+		return d->settled;
+	}
+	bool success() const {
+		return d->succeeded;
+	}
+	template<typename K>
+	static K get(const K& variant)
+	{
+		return variant;
+	}
 };
 
 };
@@ -42,7 +115,7 @@ struct Result {
 	}
 };
 
-template<typename T = void, typename ImplClass = std::conditional_t<Variantable<T> || std::is_same_v<T, void>, FutureBase, detail::NonVariantFuture<T>>>
+template<typename T = void, typename ImplClass = detail::NonVariantFuture<T>>
 class Future : public ImplClass
 {
 
@@ -78,7 +151,7 @@ public:
 
 		Future<NewT> ret;
 
-		auto wrap1 = [callback, ret](QVariant r) {
+		auto wrap1 = [callback, ret](auto r) {
 			auto bret = callback(ImplClass::template get<T>(r));
 
 			bret.then([ret](NewT t) { ret.succeed(t); }, [ret](NewT t) { ret.fail(t); });
@@ -101,6 +174,21 @@ public:
 		ImplClass::then(wrap1);
 
 		return ret;
+	}
+	operator FutureBase() {
+		if constexpr (std::is_same_v<ImplClass, FutureBase>) {
+			return this;
+		} else {
+			FutureBase ret;
+
+			then([ret](auto succ) {
+				ret.succeed(QVariant::fromValue(succ));
+			}, [ret](auto fail) {
+				ret.fail(QVariant::fromValue(fail));
+			});
+
+			return ret;
+		}
 	}
 };
 
