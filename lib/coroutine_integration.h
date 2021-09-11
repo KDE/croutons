@@ -114,13 +114,13 @@ struct coroutine_namespace::coroutine_traits<Croutons::Future<T>, Args...> {
 };
 
 template<typename... Args>
-struct coroutine_namespace::coroutine_traits<Croutons::Future<void>, Args...> {
+struct coroutine_namespace::coroutine_traits<Croutons::Future<void, Croutons::FutureBase>, Args...> {
 	struct promise_type {
 	private:
-		Croutons::Future<void> v;
+		Croutons::Future<void, Croutons::FutureBase> v;
 
 	public:
-		Croutons::Future<void> get_return_object() noexcept {
+		Croutons::Future<void, Croutons::FutureBase> get_return_object() noexcept {
 			return v;
 		}
 
@@ -162,9 +162,9 @@ auto operator co_await(Croutons::Future<T> it) noexcept {
 }
 
 template<>
-inline auto operator co_await(Croutons::Future<void> it) noexcept {
+inline auto operator co_await(Croutons::Future<void, Croutons::FutureBase> it) noexcept {
 	struct Awaiter {
-		Croutons::Future<void> future;
+		Croutons::Future<void, Croutons::FutureBase> future;
 
 		bool await_ready() const noexcept {
 			return future.settled();

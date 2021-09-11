@@ -115,7 +115,7 @@ struct Result {
 	}
 };
 
-template<typename T = void, typename ImplClass = detail::NonVariantFuture<T>>
+template<typename T = void, typename ImplClass = std::conditional_t<std::is_same_v<T, void>, FutureBase, detail::NonVariantFuture<T>>>
 class Future : public ImplClass
 {
 
