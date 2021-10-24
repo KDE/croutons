@@ -14,6 +14,8 @@ class FutureListener : public QObject
 
     Q_PROPERTY(QJSValue value READ value NOTIFY valueChanged)
 
+    // mald
+
 public:
     QJSValue _value;
     QJSValue value() const {
