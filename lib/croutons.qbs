@@ -2,8 +2,11 @@
 //
 // SPDX-License-Identifier: MIT
 
+import qbs.FileInfo
+
 Library {
     name: "croutons"
+    version: "1.1-dev"
 
     files: [
         "*.cpp",
@@ -20,6 +23,14 @@ Library {
         cpp.includePaths: product.sourceDirectory
         cpp.rpaths: product.buildDirectory
 
+        prefixMapping: [{
+            prefix: product.sourceDirectory,
+            replacement: FileInfo.joinPaths(qbs.installPrefix, "include")
+        }, {
+            prefix: product.buildDirectory,
+            replacement: FileInfo.joinPaths(qbs.installPrefix, "lib64")
+        }]
+
         Depends { name: "cpp" }
         Depends { name: "Qt"; submodules: ["core", "qml"] }
     }
@@ -30,6 +41,19 @@ Library {
     install: true
     installDir: "lib64"
 
+    Group {
+        fileTagsFilter: ["Exporter.pkgconfig.pc"]
+        qbs.install: true
+        qbs.installDir: "lib64/pkgconfig"
+    }
+    Group {
+        fileTagsFilter: ["Exporter.qbs.module"]
+        qbs.install: true
+        qbs.installDir: "share/qbs/modules/croutons"
+    }
+
     Depends { name: "cpp" }
+    Depends { name: "Exporter.pkgconfig" }
+    Depends { name: "Exporter.qbs" }
     Depends { name: "Qt"; submodules: ["core", "qml"] }
 }
