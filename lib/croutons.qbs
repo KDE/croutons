@@ -20,14 +20,14 @@ Library {
 
         cpp.cxxFlags: isClang ? ["-fcoroutines-ts", "-stdlib=libc++"] : ["-fcoroutines"]
         cpp.cxxLanguageVersion: "c++20"
-        cpp.includePaths: product.sourceDirectory
-        cpp.rpaths: product.buildDirectory
+        cpp.includePaths: exportingProduct.sourceDirectory
+        cpp.rpaths: exportingProduct.buildDirectory
 
         prefixMapping: [{
-            prefix: product.sourceDirectory,
+            prefix: exportingProduct.sourceDirectory,
             replacement: FileInfo.joinPaths(qbs.installPrefix, "include")
         }, {
-            prefix: product.buildDirectory,
+            prefix: exportingProduct.buildDirectory,
             replacement: FileInfo.joinPaths(qbs.installPrefix, "lib64")
         }]
 
