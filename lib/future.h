@@ -59,9 +59,9 @@ public:
 		FutureBase::then(wrap1, wrap2);
 	}
 	template<typename Function>
-	Future<typename std::result_of_t<Function(T)>::Kind>
+	Future<typename std::invoke_result_t<Function, T>::Kind>
 	flatMap(Function callback) const {
-		using NewT = typename std::result_of_t<Function(T)>::Kind;
+		using NewT = typename std::invoke_result_t<Function, T>::Kind;
 
 		Future<NewT> ret;
 
@@ -76,9 +76,9 @@ public:
 		return ret;
 	}
 	template<typename Function>
-	Future<typename std::result_of_t<Function(T)>>
+	Future<typename std::invoke_result_t<Function, T>>
 	map(Function callback) const {
-		using NewT = std::result_of_t<Function(T)>;
+		using NewT = std::invoke_result_t<Function, T>;
 		Future<NewT> ret;
 
 		auto wrap1 = [callback, ret](QVariant r) {
